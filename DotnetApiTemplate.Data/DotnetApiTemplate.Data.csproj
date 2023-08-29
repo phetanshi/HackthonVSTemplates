@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Definitions\**" />
+    <Compile Remove="DependencyInjection\**" />
+    <EmbeddedResource Remove="Definitions\**" />
+    <EmbeddedResource Remove="DependencyInjection\**" />
+    <None Remove="Definitions\**" />
+    <None Remove="DependencyInjection\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="IRepository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Ps.EfCoreRepository.SqlServer" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotnetApiTemplate.Logging\DotnetApiTemplate.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="LogRepo\" />
+  </ItemGroup>
+
+</Project>
