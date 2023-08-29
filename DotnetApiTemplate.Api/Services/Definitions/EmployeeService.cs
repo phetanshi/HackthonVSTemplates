@@ -23,6 +23,12 @@ namespace DotnetApiTemplate.Api.Services.Definitions
             return Mapper.Map<EmployeeReadDto>(result);
         }
 
+        public async Task<EmployeeReadDto> Get(string loginUserId)
+        {
+            var result = await Repository.GetSingleAsync<Employee>(x => x.UserId.ToLower() == loginUserId.ToLower());
+            return Mapper.Map<EmployeeReadDto>(result);
+        }
+
         public async Task<EmployeeReadDto> CreateAsync(EmployeeCreateDto empDto)
         {
             Employee emp = new Employee();

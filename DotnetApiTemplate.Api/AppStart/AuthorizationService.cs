@@ -1,6 +1,9 @@
-﻿using DotnetApiTemplate.Api.Auth;
-using DotnetApiTemplate.Api.Constants;
+﻿using DotnetApiTemplate.Api.Authorization;
+using DotnetApiTemplate.Api.Authorization.Admin;
+using DotnetApiTemplate.Api.Authorization.Default;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Negotiate;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DotnetApiTemplate.Api.AppStart
 {
@@ -10,14 +13,21 @@ namespace DotnetApiTemplate.Api.AppStart
         {
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(AppConstants.APP_POLICY, policy =>
-                {
-                    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-                    policy.RequireAuthenticatedUser();
-                    policy.Requirements.Add(new AppAuthorizationRequirement());
-                });
+                options.AddPolicy(AppPolicies.DEFAULT, new DefaultAuthorizationRequirement());
+                options.AddPolicy(AppPolicies.ADMIN, new AdminAuthorizationRequirement());
             });
             return services;
+        }
+
+        private static void AddPolicy<T>(this AuthorizationOptions options, string policyName, T requirement) where T : IAuthorizationRequirement
+        {
+            options.AddPolicy(policyName, policy =>
+            {
+                policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+                policy.AuthenticationSchemes.Add(NegotiateDefaults.AuthenticationScheme);
+                policy.RequireAuthenticatedUser();
+                policy.Requirements.Add(requirement);
+            });
         }
     }
 }

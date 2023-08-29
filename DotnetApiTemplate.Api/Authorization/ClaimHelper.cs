@@ -5,6 +5,7 @@ namespace DotnetApiTemplate.Api.Authorization
     public static class ClaimHelper
     {
         public const string EMPLOYEE_ID_KEY = "EmployeeId";
+        public const string PREFERRED_USERNAME = "preferred_username";
 
         public static int GetEmployeeId(this HttpContext context)
         {

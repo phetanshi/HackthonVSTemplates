@@ -1,5 +1,5 @@
-﻿using DotnetApiTemplate.Api.Auth;
-using DotnetApiTemplate.Api.AutoMapperProfiles;
+﻿using DotnetApiTemplate.Api.Authorization.Admin;
+using DotnetApiTemplate.Api.Authorization.Default;
 using DotnetApiTemplate.Api.Services;
 using DotnetApiTemplate.Api.Services.Definitions;
 using Microsoft.AspNetCore.Authorization;
@@ -22,8 +22,9 @@ namespace DotnetApiTemplate.Api.AppStart
         }
         private static void AddOthes(this IServiceCollection services)
         {
-            services.AddScoped<IAuthorizationHandler, AppAuthorizationHandler>();
-            services.AddAutoMapper(typeof(EmployeeAutoMapperProfile));
+            services.AddScoped<IAuthorizationHandler, DefaultAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }

@@ -20,7 +20,7 @@ namespace DotnetApiTemplate.Api.Services.Definitions
         public async Task<List<ActivityLogDto>> GetActivityLogsAsync(SearchCriteria searchCriteria)
         {
             int page = searchCriteria.Page - 1;
-            int row = searchCriteria.Row;
+            int row = searchCriteria.Rows;
 
             var activities = await logRepository.GetList<ActivityLog>()
                                             .Include(x => x.ActivtyType)
@@ -31,16 +31,17 @@ namespace DotnetApiTemplate.Api.Services.Definitions
                                             .Take(row)
                                             .ToListAsync();
 
-            var employeeIds = activities.Select(x => x.EmployeeId).ToList();
+            var employeeIds = activities.Select(x => x.EmployeeId).Distinct().ToList();
             var empList = await Repository.GetList<Employee>(x => employeeIds.Contains(x.EmployeeId)).ToListAsync();
 
             var result = from ac in activities
-                         join emp in empList on ac.EmployeeId equals emp.EmployeeId
+                         join employee in empList on ac.EmployeeId equals employee.EmployeeId into empData
+                         from emp in empData.DefaultIfEmpty()
                          select new ActivityLogDto
                          {
                              ActivityId = ac.ActivityId,
-                             EmployeeId = emp.EmployeeId,
-                             EmployeeName = emp.ToString(),
+                             EmployeeId = emp?.EmployeeId ?? 0,
+                             EmployeeName = emp?.ToString() ?? "Unknown",
                              ActivityType = ac.ActivtyType != null ? ac.ActivtyType.Type : null,
                              ActivityDesc = ac.ActivityDesc,
                              ActivityTimeStamp = ac.ActivityTimeStamp
@@ -52,7 +53,7 @@ namespace DotnetApiTemplate.Api.Services.Definitions
         public async Task<List<ErrorLogDto>> GetErrorLogsAsync(SearchCriteria searchCriteria)
         {
             int page = searchCriteria.Page - 1;
-            int row = searchCriteria.Row;
+            int row = searchCriteria.Rows;
 
             var errors = await logRepository.GetList<ErrorLog>()
                                             .Include(x => x.ErrorType)
@@ -63,16 +64,17 @@ namespace DotnetApiTemplate.Api.Services.Definitions
                                             .Take(row)
                                             .ToListAsync();
 
-            var employeeIds = errors.Select(x => x.EmployeeId).ToList();
+            var employeeIds = errors.Select(x => x.EmployeeId).Distinct().ToList();
             var empList = await Repository.GetList<Employee>(x => employeeIds.Contains(x.EmployeeId)).ToListAsync();
 
             var result = from er in errors
-                         join emp in empList on er.EmployeeId equals emp.EmployeeId
+                         join employee in empList on er.EmployeeId equals employee.EmployeeId into empData
+                         from emp in empData.DefaultIfEmpty()
                          select new ErrorLogDto
                          {
                              ErrorId = er.ErrorId,
-                             EmployeeId = emp.EmployeeId,
-                             EmployeeName = emp.ToString(),
+                             EmployeeId = emp?.EmployeeId ?? 0,
+                             EmployeeName = emp?.ToString() ?? "Unknown",
                              ErrorType = er.ErrorType != null ? er.ErrorType.Type : null,
                              ErrorMessage = er.MethodName,
                              StackTrace = er.StackTrace,

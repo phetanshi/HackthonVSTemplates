@@ -2,7 +2,8 @@ global using DotnetApiTemplate.Data;
 global using DotnetApiTemplate.Data.Models;
 
 global using DotnetApiTemplate.Api;
-global using DotnetApiTemplate.Api.Auth;
+global using DotnetApiTemplate.Api.Authorization;
+global using DotnetApiTemplate.Api.Authorization.Default;
 global using DotnetApiTemplate.Api.AppStart;
 global using DotnetApiTemplate.Api.Services;
 global using DotnetApiTemplate.Api.Services.Definitions;

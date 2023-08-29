@@ -1,12 +1,14 @@
 ﻿using Application.Dtos;
+using DotnetApiTemplate.Api.Authorization;
 using DotnetApiTemplate.Api.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotnetApiTemplate.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = AppPolicies.DEFAULT)]
     public class LoggerController : AppBaseController
     {
         private readonly IAppLogService _appLogService;
@@ -15,14 +17,14 @@ namespace DotnetApiTemplate.Api.Controllers
             this._appLogService = appLogService;
         }
 
-        [HttpGet("/", Name = "GetActivityLogs")]
+        [HttpGet(Name = "GetActivityLogs")]
         public async Task<IActionResult> GetActivityLogs([FromQuery] SearchCriteria searchCriteria)
         {
             var result = await _appLogService.GetActivityLogsAsync(searchCriteria);
             return OkDone(result);
         }
 
-        [HttpGet("/error", Name = "GetErrorLogs")]
+        [HttpGet("error", Name = "GetErrorLogs")]
         public async Task<IActionResult> GetErrorLogs([FromQuery] SearchCriteria searchCriteria)
         {
             var result = await _appLogService.GetErrorLogsAsync(searchCriteria);

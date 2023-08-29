@@ -56,7 +56,7 @@ namespace DotnetApiTemplate.Logging
                         break;
                     case LogLevel.Critical:
                     case LogLevel.Error:
-                        LogError(message, exception);
+                        LogError(state, message, exception);
                         break;
                 }
             }
@@ -93,15 +93,15 @@ namespace DotnetApiTemplate.Logging
             return logObj;
         }
 
-        private ActivityType GetActivtyTypeFromDb(ActivityType activtyType)
+        private ActivityType GetActivtyTypeFromDb(ActivityType activityType)
         {
             try
             {
-                if (activtyType == null)
+                if (activityType == null)
                     return null;
 
-                var activityType = loggerDbContext.ActivityTypes.FirstOrDefault(x => x.Type.ToLower() == activtyType.Type.ToLower());
-                return activityType;
+                var activityTypeFromDb = loggerDbContext.ActivityTypes.FirstOrDefault(x => x.Type.ToLower() == activityType.Type.ToLower());
+                return activityTypeFromDb;
             }
             catch
             {
@@ -115,13 +115,19 @@ namespace DotnetApiTemplate.Logging
 
                 var activityType = GetActivtyTypeFromDb(activityLog.ActivtyType);
 
-                if(activityType == null)
+                if (activityType != null && activityType.ActivityTypeId > 0)
+                {
+                    activityLog.ActivtyType = null;
+                    activityLog.ActivityTypeId = activityType.ActivityTypeId;
+                }
+                else
                 {
                     loggerDbContext.ActivityTypes.Add(activityLog.ActivtyType);
                     loggerDbContext.SaveChanges();
-                }
 
-                activityLog.ActivityTypeId = activityLog.ActivityTypeId;
+                    activityLog.ActivityTypeId = activityLog.ActivtyType.ActivityTypeId;
+                    activityLog.ActivtyType = null;
+                }
 
                 loggerDbContext.ActivityLogs.Add(activityLog);
                 loggerDbContext.SaveChanges();
@@ -180,34 +186,41 @@ namespace DotnetApiTemplate.Logging
             }
         }
 
-        private void LogError(string message, Exception? exception, long parentErrorId = 0)
+        private void LogError<TState>(TState state, string message, Exception? exception, long parentErrorId = 0)
         {
             try
             {
-                string url = logConfig.GetDisplayUrl() ?? "-";
-                var employeeId = logConfig.GetLoginEmployeeId();
+                ErrorLog logObj = ReadObj<TState, ErrorLog>(state);
+
+                string url = logObj?.Url ?? logConfig.GetDisplayUrl() ?? "-";
+                var employeeId = logObj?.EmployeeId ?? logConfig.GetLoginEmployeeId();
 
                 ErrorLog errorLog = GetErrorLogObject(message, exception, parentErrorId, url, employeeId);
 
                 var errorType = GetErrorTypeFromDb(errorLog.ErrorType);
 
-                if (errorType == null)
+                if (errorType != null && errorType.ErrorTypeId > 0)
+                {
+                    errorLog.ErrorType = null;
+                    errorLog.ErrorTypeId = errorType.ErrorTypeId;
+                }
+                else
                 {
                     loggerDbContext.ErrorTypes.Add(errorLog.ErrorType);
                     loggerDbContext.SaveChanges();
-                }
 
-                errorLog.ErrorTypeId = errorType.ErrorTypeId;
+                    errorLog.ErrorTypeId = errorLog.ErrorType.ErrorTypeId;
+                    errorLog.ErrorType = null;
+                }
 
                 loggerDbContext.ErrorLogs.Add(errorLog);
                 loggerDbContext.SaveChanges();
 
                 if (exception?.InnerException != null)
-                    LogError(exception.InnerException.Message, exception.InnerException, parentErrorId);
+                    LogError(state, exception.InnerException.Message, exception.InnerException, parentErrorId);
             }
             catch { }
         }
-
 
         #endregion
         private TResult ReadObj<TState, TResult>(TState state)

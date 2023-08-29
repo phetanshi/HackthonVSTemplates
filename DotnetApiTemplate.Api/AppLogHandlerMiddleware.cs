@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text;
 
@@ -25,25 +26,30 @@ namespace DotnetApiTemplate.Api
         }
         public async Task InvokeAsync(HttpContext context, ILogger<AppLogHandlerMiddleware> logger)
         {
+            var request = context.Request;
+            var url = context.Request.Path.Value;
+
+            string displayUrl = "";
+            int employeeId = 0;
+
             try
             {
-                var request = context.Request;
-                var url = context.Request.Path.Value;
-                var displayUrl = context.Request.GetDisplayUrl();
-                var employeeId = context.GetEmployeeId();
+                
+                displayUrl = context.Request.GetDisplayUrl();
+                employeeId = context.GetEmployeeId();
 
-                await logger.LogActivity(employeeId, $"Started : {url}", null, displayUrl);
+                logger.LogActivity(employeeId, $"Started : {url}", null, displayUrl);
                 await next(context);
-                await logger.LogActivity(employeeId, $"Completed : {url}", null, displayUrl);
+                logger.LogActivity(employeeId, $"Completed : {url}", null, displayUrl);
             }
             catch (UnauthorizedException ex)
             {
-                logger.LogError(ex, "Unauthorized Error Occured");
+                logger.LogError(employeeId, ex, displayUrl ?? url ?? "");
                 await ExecuteAsync(executor, context, HttpStatusCode.Unauthorized);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An unhandled exception has occurred while executing the rquest");
+                logger.LogError(employeeId, ex, displayUrl ?? url ?? "");
                 await ExecuteAsync(executor, context, HttpStatusCode.InternalServerError);
             }
         }

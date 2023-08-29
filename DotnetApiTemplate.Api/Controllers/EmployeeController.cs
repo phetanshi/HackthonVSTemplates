@@ -3,12 +3,13 @@ using DotnetApiTemplate.Api.Services;
 using Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using DotnetApiTemplate.Api.Authorization;
 
 namespace DotnetApiTemplate.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = AppConstants.APP_POLICY)]
+    [Authorize(Policy = AppPolicies.DEFAULT)]
     public class EmployeeController : AppBaseController
     {
         private readonly IEmployeeService _employeeService;
@@ -33,6 +34,7 @@ namespace DotnetApiTemplate.Api.Controllers
         }
 
         [HttpPost(Name = "CreateEmployee")]
+        [Authorize(Policy = AppPolicies.ADMIN)]
         public async Task<IActionResult> CreateEmployee([FromBody] EmployeeCreateDto emp)
         {
             var result = await _employeeService.CreateAsync(emp);
@@ -44,6 +46,7 @@ namespace DotnetApiTemplate.Api.Controllers
 
         [HttpPut]
         [Route("update")]
+        [Authorize(Policy = AppPolicies.ADMIN)]
         public async Task<IActionResult> UpdateEmployee([FromBody] EmployeeUpdateDto emp)
         {
             var result = await _employeeService.UpdateEmployeeAsync(emp);
@@ -51,6 +54,7 @@ namespace DotnetApiTemplate.Api.Controllers
         }
 
         [HttpDelete(Name = "DeleteEmployee")]
+        [Authorize(Policy = AppPolicies.ADMIN)]
         public async Task<IActionResult> DeleteEmployee([FromBody] int empId)
         {
             var isSuccess = await _employeeService.DeleteEmployeeAsync(empId);
